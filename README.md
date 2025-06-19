@@ -15,7 +15,7 @@
 ## Usage
 
 1. **Create ISO**: Use `ntlite.xml` with NTLite to generate a Forged Windows 11 ISO.
-2. **Integrate `MinSudo.exe`, `Forged.png` and the `Forge-PostInstall.ps1` in `C:\Windows\Tools` folder.
+2. **Integrate:** `MinSudo.exe`, `Forged.png` and the `Forge-PostInstall.ps1` in `C:\Windows\Tools` folder.
 3. **Install Windows**: Deploy the ISO to your target PC.
 4. **First Login**: Run `Forge-PostInstall.ps1` as the first user. The script will:
    - Apply user and system-wide tweaks
