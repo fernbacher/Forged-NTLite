@@ -207,7 +207,11 @@ public class Wallpaper {
     $IconName = "{2cc5ca98-6485-489a-920e-b3e88a6ccce3}"
     Set-RegValue -Path $IconPath -Name $IconName -Value 1 -Type "DWord"
 
-    # Remove default Windows themes for user (optional, mainly handled in SYSTEM context)
+    # --- DISABLE MOUSE ACCELERATION FOR CURRENT USER ---
+    Set-RegValue -Path "HKCU\Control Panel\Mouse" -Name "MouseSpeed" -Value "0" -Type "String"
+    Set-RegValue -Path "HKCU\Control Panel\Mouse" -Name "MouseThreshold1" -Value "0" -Type "String"
+    Set-RegValue -Path "HKCU\Control Panel\Mouse" -Name "MouseThreshold2" -Value "0" -Type "String"
+    Write-Log -Message "-> Mouse acceleration (Enhance Pointer Precision) disabled for current user."
 
     # --- Now escalate for SYSTEM/hardening tweaks ---
     $PowerShellPath = (Get-Command powershell.exe).Source
@@ -379,7 +383,7 @@ Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Syst
 Write-Log -Message "-> User Account Control (UAC) disabled."
 Set-RegValue -Path "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -Value 0 -Type "DWord"
 
-# --- SECTION VI: NETWORK STACK OPTIMIZATION & SAFE HOSTS FILE ---
+# --- SECTION VI: NETWORK STACK OPTIMIZATION ---
 
 Write-Log -Level HEADER -Message "SECTION VI: Network Stack & Hosts File"
 
@@ -489,7 +493,7 @@ foreach ($path in $ThemePaths) {
     }
 }
 
-# --- SECTION VIII: Advanced UI and Driver Hardening for all new users (DefaultUser) ---
+# --- SECTION VIII: UI Hardening for all new users (DefaultUser) ---
 
 Write-Log -Level HEADER -Message "SECTION VIII: Advanced UI and Driver Hardening (DefaultUser)"
 
