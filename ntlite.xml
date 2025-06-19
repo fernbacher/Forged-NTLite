@@ -73,8 +73,6 @@
 		<c>iis 'Internet Information Server (IIS)'</c>
 		<c>indeo 'Intel Indeo Codecs'</c>
 		<c>insiderhub 'Windows Insider Program'</c>
-		<c>internetexplorer 'Internet Explorer'</c>
-		<c>internetexplorer32 'Internet Explorer - 32 bit'</c>
 		<c>kerneldebug 'Kernel Debugging'</c>
 		<c>laps 'Windows Local Administrator Password Solution(LAPS)'</c>
 		<c>location 'Location Service'</c>
