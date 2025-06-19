@@ -379,7 +379,7 @@ Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Syst
 Write-Log -Message "-> User Account Control (UAC) disabled."
 Set-RegValue -Path "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -Value 0 -Type "DWord"
 
-# --- SECTION VI: NETWORK STACK OPTIMIZATION & HOSTS FILE DEPLOYMENT ---
+# --- SECTION VI: NETWORK STACK OPTIMIZATION & SAFE HOSTS FILE ---
 
 Write-Log -Level HEADER -Message "SECTION VI: Network Stack & Hosts File"
 
@@ -396,34 +396,31 @@ Try {
     }
 } Catch { Write-Log -Level WARN -Message "Failed to enumerate adapters for NetBIOS tweak." }
 
-Write-Log -Message "Deploying privacy-enhancing hosts file..."
-$HostsUrl = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+# --- MUCH SIMPLER HOSTS FILE ---
+Write-Log -Message "Deploying ultra-simple hosts file for compatibility and privacy..."
 $HostsPath = "$env:SystemRoot\System32\drivers\etc\hosts"
 $TempHosts = "$env:TEMP\forged-hosts.txt"
-Try {
-    if (Test-Path $TempHosts) { Remove-Item $TempHosts -Force -ErrorAction SilentlyContinue }
-    if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
-        Write-Log -Message "Downloading hosts file using curl..."
-        & curl.exe -sSL $HostsUrl -o $TempHosts
-    } else {
-        Write-Log -Message "Downloading hosts file using Invoke-WebRequest fallback..."
-        Invoke-WebRequest -Uri $HostsUrl -OutFile $TempHosts -UseBasicParsing
-    }
-    if (-not (Test-Path $TempHosts)) { throw "Hosts file download failed." }
-    if (Test-Path $HostsPath) {
-        Copy-Item -Path $HostsPath -Destination "$HostsPath.bak" -Force
-        Write-Log -Message "-> Original hosts file backed up."
-    }
-    Invoke-TrustedInstaller "takeown /f `"$HostsPath`""
-    Invoke-TrustedInstaller "icacls `"$HostsPath`" /grant `"$env:USERNAME`":F"
-    Copy-Item -Path $TempHosts -Destination $HostsPath -Force
-    Write-Log -Message "-> New hosts file deployed."
-    Try { ipconfig /flushdns | Out-Null } Catch {}
-    Write-Log -Message "-> DNS cache flushed."
-    Remove-Item $TempHosts -Force
-} Catch {
-    Write-Log -Level ERROR -Message "Failed to deploy hosts file: $_"
+@"
+# Forged Windows 11 - Minimal Hosts File
+127.0.0.1       localhost
+::1             localhost
+
+# Optional: Block a couple privacy/telemetry domains (commented out for safety)
+#0.0.0.0        telemetry.microsoft.com
+#0.0.0.0        vortex.data.microsoft.com
+"@ | Set-Content -Path $TempHosts -Encoding ASCII
+
+if (Test-Path $HostsPath) {
+    Copy-Item -Path $HostsPath -Destination "$HostsPath.bak" -Force
+    Write-Log -Message "-> Original hosts file backed up."
 }
+Invoke-TrustedInstaller "takeown /f `"$HostsPath`""
+Invoke-TrustedInstaller "icacls `"$HostsPath`" /grant `"$env:USERNAME`":F"
+Copy-Item -Path $TempHosts -Destination $HostsPath -Force
+Write-Log -Message "-> Minimal hosts file deployed."
+Try { ipconfig /flushdns | Out-Null } Catch {}
+Write-Log -Message "-> DNS cache flushed."
+Remove-Item $TempHosts -Force
 
 # --- SECTION VII: UI Sterilization & Branding for DefaultUser (wallpaper, LayoutModification.xml) ---
 
