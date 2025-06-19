@@ -4,10 +4,10 @@
 
 ## Features
 
-- **Massive Debloat**: Removes dozens of built-in apps NTLite (see `ntlite.xml`).
+- **Massive Debloat**: Removes dozens of built-in apps NTLite (see `ntlite.xml`). **Everything is revertible, i will not assist you with that.**
 - **Aggressive Optimization**: Disables Spectre/Meltdown mitigations, UAC, unnecessary services, and scheduled tasks.
 - **Privacy Hardening**: Applies deep anti-telemetry and anti-tracking registry tweaks.
-- **Performance Tweaks**: Enables Ultimate Performance power plan, tunes NTFS, BCDEdit, and network stack.
+- **Performance Tweaks**: Enables Ultimate Performance power plan **you need to select it yourself in powercfg.cpl**, tunes NTFS, BCDEdit, and network stack.
 - **UI Customization**: Sets classic Start Menu (Open-Shell), disables search/taskbar clutter, applies custom wallpaper.
 - **System Cleanup**: Clears event logs, Windows Update, default themes, and temporary files.
 - **Self-Destruct/Reboot**: Script wipes itself and reboots after applying all changes.
