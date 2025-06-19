@@ -244,6 +244,8 @@ Invoke-TrustedInstaller "bcdedit /deletevalue useplatformclock"
 Write-Log -Message "-> Ensured 'useplatformclock' is not enabled."
 Invoke-TrustedInstaller "bcdedit /set hypervisorlaunchtype off"
 Write-Log -Message "-> Hypervisor launch disabled."
+Invoke-TrustedInstaller "bcdedit /timeout 10"
+Write-Log -Message "-> Dual boot select screen timeout set to 10 seconds."
 
 Write-Log -Message "Tuning NTFS for improved performance."
 Invoke-TrustedInstaller "fsutil behavior set disablelastaccess 1"
@@ -294,7 +296,7 @@ $ServicesToDisable = @(
     "SensorDataService", "SensorService", "SensrSvc", "SharedRealitySvc", "WalletService", "WbioSrvc", "WdiServiceHost", "WdiSystemHost",
     "wisvc", "workfolderssvc", "WwanSvc", "XblAuthManager", "XblGameSave", "XboxGipSvc", "XboxNetApiSvc",
     "RemoteRegistry", "TermService", "UmRdpService", "SecurityHealthService", "wscsvc", "Sense",
-    "SysMain", "SEMgrSvc", "spectrum", "DoSvc"
+    "SysMain", "SEMgrSvc", "spectrum", "DoSvc", "DPS"
 )
 $ServicesToSetManual = @(
     "bthserv", "BluetoothUserService", "BthAvctpSvc", "hidserv", "TabletInputService"
@@ -382,6 +384,7 @@ Write-Log -Message "Applying system behavior modifications..."
 Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Value 0 -Type "DWord"
 Write-Log -Message "-> User Account Control (UAC) disabled."
 Set-RegValue -Path "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -Value 0 -Type "DWord"
+Write-Log -Message "-> Hiberboot disabled."
 
 # --- SECTION VI: NETWORK STACK OPTIMIZATION ---
 
@@ -389,6 +392,7 @@ Write-Log -Level HEADER -Message "SECTION VI: Network Stack & Hosts File"
 
 Write-Log -Message "Applying network adapter and protocol tweaks..."
 Try { Invoke-TrustedInstaller "netsh int tcp set global autotuninglevel=disabled" } Catch {}
+# Disabling autotuning can significantly reduce download speeds
 Write-Log -Message "-> TCP Auto-Tuning disabled."
 Try { Invoke-TrustedInstaller "netsh int tcp set global rss=disabled" } Catch {}
 Write-Log -Message "-> Receive-Side Scaling (RSS) disabled."
