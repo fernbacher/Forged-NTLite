@@ -238,8 +238,6 @@ Invoke-TrustedInstaller 'reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session 
 Write-Log -Message "Applying BCDEdit tweaks for low latency."
 Invoke-TrustedInstaller "bcdedit /set disabledynamictick yes"
 Write-Log -Message "-> Dynamic Tick disabled."
-Invoke-TrustedInstaller "bcdedit /set tscsyncpolicy enhanced"
-Write-Log -Message "-> TSC Sync Policy set to Enhanced."
 Invoke-TrustedInstaller "bcdedit /deletevalue useplatformclock"
 Write-Log -Message "-> Ensured 'useplatformclock' is not enabled."
 Invoke-TrustedInstaller "bcdedit /set hypervisorlaunchtype off"
