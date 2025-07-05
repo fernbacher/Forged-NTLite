@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forged NTLite</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <div id="aurora-cursor"></div>
+
+    <header class="main-header">
+        <div class="header-content">
+            <h1>Forged-NTLite</h1>
+            <div class="theme-switcher">
+                <i class="fa-solid fa-sun"></i>
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider"></span>
+                </label>
+                <i class="fa-solid fa-moon"></i>
+            </div>
+        </div>
+    </header>
+
+    <main class="content-wrapper">
+        <section class="hero fade-in">
+            <h2 class="hero-title">An Aggressively Optimized Windows 11 Image.</h2>
+            <p class="hero-subtitle">
+                <strong>Forged Windows 11</strong> is a stripped-down 24H2 image for gaming and dedicated PCs. It uses NTLite to remove bloat and a post-install script to disable telemetry and improve performance.
+            </p>
+            <p class="hero-warning">
+                Intended for isolated, non-production use. Many security protections are disabled.
+            </p>
+        </section>
+
+        <section class="features-section reveal-on-scroll">
+            <h3 class="section-title">Core Features</h3>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="card-content">
+                        <div class="card-icon"><i class="fa-solid fa-ghost"></i></div>
+                        <h4>Massive Debloat</h4>
+                        <p>Dozens of built-in apps and services are removed, freeing up disk space and memory while eliminating pre-installed telemetry.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="card-content">
+                        <div class="card-icon"><i class="fa-solid fa-user-secret"></i></div>
+                        <h4>Privacy Hardening</h4>
+                        <p>Disables Windows telemetry, data collection, and feedback tasks by removing services and setting strict registry policies.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="card-content">
+                        <div class="card-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                        <h4>Performance Tweaks</h4>
+                        <p>Applies aggressive tuning by disabling CPU mitigations, installing the Ultimate Performance plan, and optimizing system settings.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="card-content">
+                        <div class="card-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                        <h4>UI Cleanup</h4>
+                        <p>Installs the classic Open-Shell start menu and removes taskbar clutter for a lean, focused interface.</p>
+                    </div>
+                </div>
+                 <div class="feature-card">
+                    <div class="card-content">
+                        <div class="card-icon"><i class="fa-solid fa-crosshairs"></i></div>
+                        <h4>Targeted Optimizations</h4>
+                        <p>Fine-tunes low-level settings, including NTFS for faster file access and network tweaks for lower latency.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="card-content">
+                        <div class="card-icon"><i class="fa-solid fa-power-off"></i></div>
+                        <h4>Auto-Reboot & Cleanup</h4>
+                        <p>The post-install script automatically reboots and can self-destruct, leaving the system in its final, clean state.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="requirements-section reveal-on-scroll">
+            <h3 class="section-title">Requirements</h3>
+            <ul class="requirements-list">
+                <li><i class="fa-brands fa-windows"></i> Windows 11 24H2 (x64) installation media</li>
+                <li><i class="fa-solid fa-rocket"></i> NTLite (Windows image customization tool)</li>
+                <li><i class="fa-solid fa-server"></i> A dedicated or disposable PC/VM for testing</li>
+                <li><i class="fa-solid fa-user-astronaut"></i> Basic familiarity with PowerShell (advanced user)</li>
+            </ul>
+        </section>
+
+        <section class="usage-section reveal-on-scroll">
+            <h3 class="section-title">Usage</h3>
+            <ol class="usage-steps">
+                <li>
+                    <div class="step-number">1</div>
+                    <p><strong>Create a Custom ISO:</strong> Load a Windows 11 ISO into NTLite, import the provided <code>ntlite.xml</code> preset, and build the new image.</p>
+                </li>
+                <li>
+                    <div class="step-number">2</div>
+                    <p><strong>Integrate Tools:</strong> Copy <code>MinSudo.exe</code>, <code>Forged.png</code>, and <code>Forge-PostInstall.ps1</code> into the image's <code>C:\Windows\Tools</code> folder.</p>
+                </li>
+                <li>
+                    <div class="step-number">3</div>
+                    <p><strong>Install Windows:</strong> Boot from the forged ISO and complete the standard Windows 11 installation and setup.</p>
+                </li>
+                <li>
+                    <div class="step-number">4</div>
+                    <p><strong>Run Optimization Script:</strong> Log in and run <code>Forge-PostInstall.ps1</code> as administrator. The system will apply all tweaks and reboot into its final state.</p>
+                </li>
+            </ol>
+        </section>
+
+    </main>
+
+    <footer class="main-footer reveal-on-scroll">
+        <p>This build is <strong>for advanced users only.</strong> You assume all risks.</p>
+        <a href="https://github.com/fernbacher/Forged-NTLite" class="cta-button" target="_blank" rel="noopener noreferrer">
+            <i class="fa-brands fa-github"></i>
+            Get Source Code on GitHub
+        </a>
+        <div class="footer-meta">
+             Forged NTLite by Fernbacher &copy; 2025
+        </div>
+    </footer>
+
+</body>
+</html>
