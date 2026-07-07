@@ -2,16 +2,6 @@
 
 **Forged Windows 11** is a stripped-down, aggressively optimized Windows 11 24H2 build for dedicated gaming and special-purpose PCs. This project removes bloat, disables telemetry, maximizes system performance, and applies privacy-focused settings. It is intended for isolated, non-production systems where security trade-offs are acceptable.
 
-## Features
-
-- **Massive Debloat**: Removes dozens of built-in apps NTLite (see `ntlite.xml`). **Everything is revertible, i will not assist you with that.**
-- **Aggressive Optimization**: Disables Spectre/Meltdown mitigations, UAC, unnecessary services, and scheduled tasks.
-- **Privacy Hardening**: Applies deep anti-telemetry and anti-tracking registry tweaks.
-- **Performance Tweaks**: Enables Ultimate Performance power plan **you need to select it yourself in powercfg.cpl**, tunes NTFS, BCDEdit, and network stack.
-- **UI Customization**: Sets classic Start Menu (Open-Shell), disables search/taskbar clutter, applies custom wallpaper.
-- **System Cleanup**: Clears event logs, Windows Update, default themes, and temporary files.
-- **Self-Destruct/Reboot**: Script wipes itself and reboots after applying all changes.
-
 ## Usage
 
 1. **Create ISO**: Use `ntlite.xml` with NTLite to generate a Forged Windows 11 ISO.
@@ -27,7 +17,7 @@
 
 ## Requirements
 
-- Windows 11 24H2 x64
+- Windows 11
 - NTLite for ISO creation
 - Isolated, disposable, or gaming system
 
