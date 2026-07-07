@@ -5,7 +5,7 @@
     ================================================================================================================
 
     DESCRIPTION:
-    Applies aggressive performance, privacy, and latency optimizations to a debloated Windows 11 24H2/26H2
+    Applies aggressive performance, privacy, and latency optimizations to a debloated Windows 11
     environment. Designed for single-use execution immediately after first login on a Forged ISO.
 
     WARNING:
