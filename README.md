@@ -1,6 +1,6 @@
 # Forged Windows 11 - Extreme Debloat & Performance 
 
-**Forged Windows 11** is a stripped-down, aggressively optimized Windows 11 24H2 build for dedicated gaming and special-purpose PCs. This project removes bloat, disables telemetry, maximizes system performance, and applies privacy-focused settings. It is intended for isolated, non-production systems where security trade-offs are acceptable.
+**Forged Windows 11** is a stripped-down, aggressively optimized Windows 11 for dedicated gaming and special-purpose PCs. This project removes bloat, disables telemetry, maximizes system performance, and applies privacy-focused settings. It is intended for isolated, non-production systems where security trade-offs are acceptable.
 
 ## Usage
 
