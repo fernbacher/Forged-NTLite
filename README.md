@@ -101,11 +101,7 @@ sudo
 
 Due to time constraints, OneDrive may still reappear after reboot. The XOS `onedrive.bat` removes it during the post‑install phase, but Windows can sneak it back.
 
-**If you see OneDrive after reboot, run this once manually (as Administrator):**
-
-```
-# Stop
-```
+**If you see OneDrive after reboot, simply uninstall it.**
 
 ---
 
