@@ -1,0 +1,11 @@
+<LayoutModificationTemplate xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification" xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout">
+  <LayoutOptions StartTileGroupCellWidth="6" />
+  <CustomTaskbarLayoutCollection PinListPlacement="Replace">
+    <defaultlayout:TaskbarLayout>
+      <taskbar:TaskbarPinList />
+    </defaultlayout:TaskbarLayout>
+  </CustomTaskbarLayoutCollection>
+  <StartLayoutCollection>
+    <defaultlayout:StartLayout GroupCellWidth="6" />
+  </StartLayoutCollection>
+</LayoutModificationTemplate>
