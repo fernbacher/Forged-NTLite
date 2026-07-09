@@ -22,8 +22,8 @@
 - **Registry hardening merged from four legendary sources**:
   - [ValleyOfDoom/PC-Tuning](https://github.com/ValleyOfDoom/PC-Tuning)
   - [djdallmann/GamingPCSetup](https://github.com/djdallmann/GamingPCSetup)
-  - [XOS Playbook](https://github.com/amitxv/Ameliorated) (via Ameliorated)
-  - [Revision Playbook](https://github.com/amitxv/ReviOS) (via ReviOS)
+  - [XOS Playbook](https://discord.gg/XTYEjZNPgX)
+  - [Revision Playbook](https://revi.cc/)
 - **TrustedInstaller post‑install script** – runs on first logon to annihilate Defender, remove Edge (via its own uninstaller), disable ~100 scheduled tasks, kill telemetry, set up the Ultimate Performance power plan, and more.
 - **Fully automated** – places `autounattend.xml` at ISO root to bypass TPM/SecureBoot, create a local admin user, skip OOBE privacy screens, and auto‑launch the Forged script.
 
