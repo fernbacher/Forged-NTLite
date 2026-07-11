@@ -62,9 +62,8 @@ sudo pacman -S p7zip wimlib libisoburn   # or equivalent on your distro
 ### Build
 
 ```
-cd forged-iso-build
+cd Forged
 ./forge-iso.sh /path/to/en-us_windows_11_consumer_editions_version_25h2_*.iso
-# Output: ./Forged-Win11.iso
 ```
 
 The script:
@@ -86,12 +85,7 @@ Forged is built with dual‑boot in mind. Here’s a minimal recipe:
 1. **Shrink your Linux partition** (or leave unallocated space) before installing.
 2. **Install Forged Windows** to the empty space – the installer won't touch your Linux partitions if you choose manually.
 3. **After installation**, Windows will likely override the boot order. Use your UEFI boot menu to choose your Linux bootloader (e.g., `systemd-boot`, `GRUB`, or `rEFInd`).
-4. **Restore Linux as default** – on CachyOS, you can use `efibootmgr`:
-
-```
-sudo
-```
-5. **Set Windows UTC clock** – Forged already sets `RealTimeIsUniversal=1` in the registry, so your Linux and Windows clocks stay in sync.
+4. **Set Windows UTC clock** – Forged already sets `RealTimeIsUniversal=1` in the registry, so your Linux and Windows clocks stay in sync.
 
 > 💡 My CachyOS tuning repository: [fernbacher/cachyos-optimization](https://github.com/fernbacher/cachyos-optimization) – use it for a latency‑optimised kernel, ZRAM, scheduler tweaks, and more.
 
