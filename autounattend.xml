@@ -46,14 +46,18 @@
                 </RunSynchronousCommand>
                 <RunSynchronousCommand>
                     <Order>3</Order>
-                    <Path>reg.exe add "HKLM\SYSTEM\Setup\LabConfig" /v BypassRAMCheck /t REG_DWORD /d 1 /f</Path>
+                    <Path>reg.exe add "HKLM\SYSTEM\Setup\LabConfig" /v BypassCPUCheck /t REG_DWORD /d 1 /f</Path>
                 </RunSynchronousCommand>
                 <RunSynchronousCommand>
                     <Order>4</Order>
+                    <Path>reg.exe add "HKLM\SYSTEM\Setup\LabConfig" /v BypassRAMCheck /t REG_DWORD /d 1 /f</Path>
+                </RunSynchronousCommand>
+                <RunSynchronousCommand>
+                    <Order>5</Order>
                     <Path>reg.exe add "HKLM\SYSTEM\Setup\LabConfig" /v BypassStorageCheck /t REG_DWORD /d 1 /f</Path>
                 </RunSynchronousCommand>
                             <RunSynchronousCommand>
-                    <Order>5</Order>
+                    <Order>6</Order>
                     <Path>regedit.exe /s C:\Windows\Setup\Scripts\driver-exclude.reg</Path>
                 </RunSynchronousCommand>
             </RunSynchronous>
@@ -64,6 +68,84 @@
         <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <ComputerName>FORGED-PC</ComputerName>
             <TimeZone>UTC</TimeZone>
+        </component>
+        <!-- ================================================================
+        specialize: Apply critical registry before driver detection runs.
+        This pass executes BEFORE windowsPE RunSynchronous, guaranteeing
+        driver search policies and BitLocker prevention are active early.
+        ================================================================ -->
+        <component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <RunSynchronous>
+                <!-- ============================================================
+                CRITICAL: Disable Defender + Windows Update services via direct
+                registry manipulation. Using sc.exe during specialize fails
+                because the Service Control Manager isn't fully initialized.
+                Setting Start=4 (Disabled) in the registry is atomic and
+                takes effect as soon as the service attempts to start.
+                Post-install Phase 2 will handle the actual process killing.
+                ============================================================ -->
+                <RunSynchronousCommand>
+                    <Order>1</Order>
+                    <Path>regedit.exe /s C:\Windows\Setup\Scripts\services-disable.reg</Path>
+                </RunSynchronousCommand>
+
+                <!-- Block Windows Update from searching for drivers during setup -->
+                <RunSynchronousCommand>
+                    <Order>2</Order>
+                    <Path>reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DriverSearching" /v DontSearchWindowsUpdate /t REG_DWORD /d 1 /f</Path>
+                </RunSynchronousCommand>
+                <RunSynchronousCommand>
+                    <Order>3</Order>
+                    <Path>reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DriverSearching" /v SearchOrderConfig /t REG_DWORD /d 0 /f</Path>
+                </RunSynchronousCommand>
+                <RunSynchronousCommand>
+                    <Order>4</Order>
+                    <Path>reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching" /v SearchOrderConfig /t REG_DWORD /d 0 /f</Path>
+                </RunSynchronousCommand>
+                <RunSynchronousCommand>
+                    <Order>5</Order>
+                    <Path>reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching" /v DontSearchWindowsUpdate /t REG_DWORD /d 1 /f</Path>
+                </RunSynchronousCommand>
+                <!-- Prevent BitLocker automatic device encryption (Win 11 24H2+) -->
+                <RunSynchronousCommand>
+                    <Order>6</Order>
+                    <Path>reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\BitLocker" /v PreventDeviceEncryption /t REG_DWORD /d 1 /f</Path>
+                </RunSynchronousCommand>
+                <!-- Disable Co-Installers (blocks Razer/Corsair/Logitech driver auto-install) -->
+                <RunSynchronousCommand>
+                    <Order>7</Order>
+                    <Path>reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" /v DisableCoInstallers /t REG_DWORD /d 1 /f</Path>
+                </RunSynchronousCommand>
+                <!-- Block Copilot at machine level before first user logon -->
+                <RunSynchronousCommand>
+                    <Order>8</Order>
+                    <Path>reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v TurnOffWindowsCopilot /t REG_DWORD /d 1 /f</Path>
+                </RunSynchronousCommand>
+                <RunSynchronousCommand>
+                    <Order>9</Order>
+                    <Path>reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v DisableAIDataAnalysis /t REG_DWORD /d 1 /f</Path>
+                </RunSynchronousCommand>
+                <!-- Block ALL Windows Update access before setup completes (prevents driver downloads) -->
+                <RunSynchronousCommand>
+                    <Order>10</Order>
+                    <Path>reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v DisableWindowsUpdateAccess /t REG_DWORD /d 1 /f</Path>
+                </RunSynchronousCommand>
+                <!-- Defender exclusion: prevent scanning Forged tools during OOBE -->
+                <RunSynchronousCommand>
+                    <Order>11</Order>
+                    <Path>reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Paths" /v "C:\Windows\Setup\Scripts" /t REG_DWORD /d 0 /f</Path>
+                </RunSynchronousCommand>
+                <!-- Prevent device driver searching entirely (stronger than DriverSearching alone) -->
+                <RunSynchronousCommand>
+                    <Order>12</Order>
+                    <Path>reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings" /v DisableSendRequestAdditionalSoftwareToWER /t REG_DWORD /d 1 /f</Path>
+                </RunSynchronousCommand>
+                <!-- Force empty start menu pins via CSP policy before OOBE -->
+                <RunSynchronousCommand>
+                    <Order>13</Order>
+                    <Path>reg.exe add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\device\Start" /v ConfigureStartPins /t REG_SZ /d "{&quot;pinnedList&quot;:[{&quot;packagedAppId&quot;:&quot;windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel&quot;}]}" /f</Path>
+                </RunSynchronousCommand>
+            </RunSynchronous>
         </component>
     </settings>
 
