@@ -2,6 +2,7 @@
 
 > The last Windows project I'll ever make.  
 > Forged is a Linux-native toolchain that builds a debloated, gaming-focused Windows 11 ISO without touching NTLITE or any Windows-only tools. It's designed for dual-booters who only keep Windows around for games that refuse to run on Linux (anti-cheat, kernel-level DRM, etc.).
+> This project does NOT target beginners from both ecosystems.
 
 ---
 
@@ -16,7 +17,7 @@
 
 ## What Does Forged Do?
 
-- **Single-pass ISO builder** – extracts your Windows 11 ISO, keeps only the **Pro** edition, deletes every other edition.
+- **Single-pass ISO builder** – extracts your Windows 11/10 ISO, keeps only the **Pro** edition, deletes every other edition.
 - **Offline AppX debloat** – physically removes bloatware packages from the WIM **before** Windows ever boots (Bing, Xbox, Teams, Clipchamp, Store, etc.).
 - **Registry hardening from four legendary sources**:
   - [ValleyOfDoom/PC-Tuning](https://github.com/ValleyOfDoom/PC-Tuning)
