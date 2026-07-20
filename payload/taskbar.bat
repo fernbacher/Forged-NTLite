@@ -10,6 +10,8 @@ REG DELETE "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband" /v
 REG DELETE "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband" /v FavoritesChanges /f >nul 2>&1
 REG ADD "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v TurnOffWindowsCopilot /t REG_DWORD /d 1 /f >nul 2>&1
 REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v TurnOffWindowsCopilot /t REG_DWORD /d 1 /f >nul 2>&1
+REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v HideSCAMeetNow /t REG_DWORD /d 1 /f >nul 2>&1
+REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v HideSCAMeetNow /t REG_DWORD /d 1 /f >nul 2>&1
 start explorer.exe
 
 del /q/f/s %TEMP%\*

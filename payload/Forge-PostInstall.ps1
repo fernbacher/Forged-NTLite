@@ -73,7 +73,9 @@ function Invoke-TI {
             Write-Log -Level WARN -Message "TI exit=$($proc.ExitCode): $($Command.Substring(0, [Math]::Min(70, $Command.Length)))"
         }
     } Catch {
-        Write-Log -Level ERROR -Message "TI crashed: $($Command.Substring(0, [Math]::Min(70, $Command.Length)))"
+        if (-not $IgnoreErrors) {
+            Write-Log -Level ERROR -Message "TI crashed: $($Command.Substring(0, [Math]::Min(70, $Command.Length)))"
+        }
     }
 }
 
@@ -154,6 +156,27 @@ if ($CurrentUser -match "^NT AUTHORITY\\(SYSTEM|TrustedInstaller)$") {
     Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowTaskViewButton" -Value 0 -Type "DWord"
     Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarMn" -Value 0 -Type "DWord"
     Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" -Name "SearchboxTaskbarMode" -Value 1 -Type "DWord"
+    # Hide MeetNow (Skype meeting) icon on taskbar (Windows 10 20H1+)
+    # Must use "HideSCAMeetNow" -- "HideMeetingBar" is the wrong key and doesn't work
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "HideSCAMeetNow" -Value 1 -Type "DWord"
+    Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "HideSCAMeetNow" -Value 1 -Type "DWord"
+
+    # Notification & tray: block balloon ads, prevent auto-hiding tray icons (Revision)
+    Set-RegValue -Path "HKCU\Software\Policies\Microsoft\Windows\Explorer" -Name "NoBalloonFeatureAdvertisements" -Value 1 -Type "DWord"
+    Set-RegValue -Path "HKCU\Software\Policies\Microsoft\Windows\Explorer" -Name "NoAutoTrayNotify" -Value 1 -Type "DWord"
+    # Hide People bar from taskbar (Win10)
+    Set-RegValue -Path "HKCU\Software\Policies\Microsoft\Windows\Explorer" -Name "HidePeopleBar" -Value 1 -Type "DWord"
+    # Suppress "Let's finish setting up your device" nag (Scoobe)
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement" -Name "ScoobeSystemSettingEnabled" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager\Context\CloudExperienceHostIntent\Wireless" -Name "ScoobeCheckCompleted" -Value 1 -Type "DWord"
+    # Hide OneDrive sync provider ads in Explorer
+    Set-RegValue -Path "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowSyncProviderNotifications" -Value 0 -Type "DWord"
+    # Suppress unsupported hardware notification (watermark on desktop)
+    Set-RegValue -Path "HKCU\Control Panel\UnsupportedHardwareNotificationCache" -Name "SV1" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\Control Panel\UnsupportedHardwareNotificationCache" -Name "SV2" -Value 0 -Type "DWord"
+    # Remove 3D Objects folder from This PC sidebar (XOS)
+    Remove-RegKey -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}"
+    Remove-RegKey -Path "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}"
 
     # Classic context menu
     $CCMKey = "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32"
@@ -184,6 +207,18 @@ if ($CurrentUser -match "^NT AUTHORITY\\(SYSTEM|TrustedInstaller)$") {
     Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-338389Enabled" -Value 0 -Type "DWord"
     Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-353698Enabled" -Value 0 -Type "DWord"
     Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "FeatureManagementEnabled" -Value 0 -Type "DWord"
+    # CDM master switch + additional ad channels (Revision audit)
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContentEnabled" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-310093Enabled" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-314559Enabled" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-280815Enabled" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-314563Enabled" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-202914Enabled" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-280810Enabled" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-280811Enabled" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "PreInstalledAppsEverEnabled" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "RemediationRequired" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "RotatingLockScreenOverlayEnabled" -Value 0 -Type "DWord"
     Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Value 0 -Type "DWord"
     Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" -Name "DisableSearchBoxSuggestions" -Value 1 -Type "DWord"
     Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" -Name "CortanaConsent" -Value 0 -Type "DWord"
@@ -235,12 +270,42 @@ if ($CurrentUser -match "^NT AUTHORITY\\(SYSTEM|TrustedInstaller)$") {
     Set-RegValue -Path "HKCU\System\GameConfigStore" -Name "GameDVR_FSEBehaviorMode" -Value 0 -Type "DWord"
     Set-RegValue -Path "HKCU\System\GameConfigStore" -Name "GameDVR_Enabled" -Value 0 -Type "DWord"
 
+    # NVIDIA telemetry OFF (Revision)
+    Set-RegValue -Path "HKCU\Software\NVIDIA Corporation\NVControlPanel2\Client" -Name "OptInOrOutPreference" -Value 0 -Type "DWord"
+    # EdgeUI: disable Most Frequently Used app tracking (Revision)
+    Set-RegValue -Path "HKCU\Software\Policies\Microsoft\Windows\EdgeUI" -Name "DisableMFUTracking" -Value 1 -Type "DWord"
+
     # OneDrive removal: run XOS onedrive.bat
     $onedriveBat = "$ToolsPath\onedrive.bat"
     if (Test-Path $onedriveBat) {
         Try { Start-Process $onedriveBat -Wait -NoNewWindow -ErrorAction SilentlyContinue } Catch {}
         Write-Log -Message "OneDrive removal executed."
     }
+
+    # OneDrive permanent prevention -- block reinstall via registry policy paths
+    Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSyncNGSC" -Value 1 -Type "DWord"
+    Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSync" -Value 1 -Type "DWord"
+    Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Name "DisableLibrariesDefaultSaveToOneDrive" -Value 1 -Type "DWord"
+    Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Name "PreventNetworkTrafficPreUserSignIn" -Value 1 -Type "DWord"
+
+    # --- Install TinyRetroPad + remove Windows Notepad (user context) ---
+    $trpadSrc = "$ToolsPath\trpad.exe"
+    $trpadDest = "$env:SystemRoot\System32\trpad.exe"
+    if (Test-Path $trpadSrc) {
+        Copy-Item $trpadSrc $trpadDest -Force
+        # Register system-wide .txt association via ftype/assoc
+        cmd /c "ftype trpad=$trpadDest `"%1`"" 2>$null | Out-Null
+        cmd /c "assoc .txt=trpad" 2>$null | Out-Null
+        Write-Log -Message "TinyRetroPad installed to System32, set as default .txt editor."
+    } else {
+        Write-Log -Level WARN -Message "trpad.exe not found -- TinyRetroPad skipped."
+    }
+    # Remove Windows Notepad AppX
+    Try {
+        Get-AppxPackage -AllUsers "*Microsoft.WindowsNotepad*" -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction SilentlyContinue
+        Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Where-Object { $_.PackageName -like "*Microsoft.WindowsNotepad*" } | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
+        Write-Log -Message "Windows Notepad removed."
+    } Catch { Write-Log -Level WARN -Message "Notepad removal failed (may already be gone)." }
 
 
     # Create VBS toggle scripts on desktop (anti-cheat games)
@@ -259,12 +324,6 @@ echo VBS disabled. REBOOT REQUIRED.
 pause
 "@ | Set-Content -Path "$env:USERPROFILE\Desktop\VBS-OFF.bat" -Force
     Write-Log -Message "VBS toggle scripts created on desktop."
-    # OneDrive removal via XOS onedrive.bat (user context)
-    $onedriveBat = "$ToolsPath\onedrive.bat"
-    if (Test-Path $onedriveBat) {
-        Try { Start-Process $onedriveBat -Wait -NoNewWindow -ErrorAction SilentlyContinue } Catch {}
-        Write-Log -Message "OneDrive removal executed."
-    }
 
     # --- Escalate to SYSTEM/TrustedInstaller ---
     Write-Log -Message "Escalating to SYSTEM for system-wide optimizations..."
@@ -314,6 +373,10 @@ Try { Stop-Process -Name "smartscreen" -Force -ErrorAction SilentlyContinue } Ca
 # IFEO block DeviceCensus
 Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\DeviceCensus.exe" -Name "Debugger" -Value "%SYSTEMROOT%\System32\taskkill.exe" -Type "String"
 
+# XOS approach: rename MpCmdRun.exe to OFFmeansOFF.exe (physically prevents Defender scanner)
+Invoke-TI 'cmd.exe /c "for /r "%ProgramFiles%\Windows Defender" %f in (MpCmdRun.exe) do @if exist "%f" ren "%f" OFFmeansOFF.exe"'
+
+
 # Remove SecurityHealth and WindowsDefender from Run
 Remove-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "SecurityHealth"
 Remove-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "WindowsDefender"
@@ -353,10 +416,12 @@ Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" -Name "Enab
 Set-RegValue -Path "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" -Name "Enabled" -Value 0 -Type "DWord"
 Set-RegValue -Path "HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy" -Name "VerifiedAndReputablePolicyState" -Value 0 -Type "DWord"
 
-# Hide Windows Security systray
+# Hide Windows Security systray + suppress "Turn on" notifications
 Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray" -Name "HideSystray" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Notifications" -Name "DisableNotifications" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Notifications" -Name "DisableEnhancedNotifications" -Value 1 -Type "DWord"
 
-# Create boot-time safety task to keep defender dead
+# Create boot-time safety task to keep defender dead + OneDrive nuked + Copilot blocked + BitLocker off
 $BootSafetyScript = @'
 sc.exe stop MDCoreSvc; sc.exe stop WinDefend; sc.exe stop WdNisSvc; Start-Sleep -Seconds 5;
 reg add HKLM\SYSTEM\CurrentControlSet\Services\WinDefend /v Start /t REG_DWORD /d 4 /f;
@@ -365,6 +430,29 @@ reg add HKLM\SYSTEM\CurrentControlSet\Services\MDCoreSvc /v Start /t REG_DWORD /
 reg add HKLM\SYSTEM\CurrentControlSet\Services\WdNisDrv /v Start /t REG_DWORD /d 4 /f;
 reg add HKLM\SYSTEM\CurrentControlSet\Services\WdBoot /v Start /t REG_DWORD /d 4 /f;
 reg add HKLM\SYSTEM\CurrentControlSet\Services\WdFilter /v Start /t REG_DWORD /d 4 /f;
+rem ---- OneDrive: kill processes, block services, prevent reinstall ----
+taskkill /f /im OneDrive.exe >nul 2>&1;
+taskkill /f /im OneDrive.App.exe >nul 2>&1;
+taskkill /f /im FileCoAuth.exe >nul 2>&1;
+sc.exe stop OneDriveUpdaterService 2>nul;
+sc.exe delete OneDriveUpdaterService 2>nul;
+reg add HKLM\SOFTWARE\Policies\Microsoft\Windows\OneDrive /v DisableFileSyncNGSC /t REG_DWORD /d 1 /f;
+reg add HKLM\SOFTWARE\Policies\Microsoft\Windows\OneDrive /v DisableFileSync /t REG_DWORD /d 1 /f;
+rem ---- Copilot: kill processes, block via IFEO ----
+taskkill /f /im Copilot.exe 2>nul;
+taskkill /f /im CopilotNative.exe 2>nul;
+taskkill /f /im CopilotHost.exe 2>nul;
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\Copilot.exe" /v Debugger /t REG_SZ /d "%SYSTEMROOT%\System32\taskkill.exe" /f;
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\CopilotNative.exe" /v Debugger /t REG_SZ /d "%SYSTEMROOT%\System32\taskkill.exe" /f;
+rem ---- BitLocker: keep it dead ----
+reg add HKLM\SYSTEM\CurrentControlSet\Control\BitLocker /v PreventDeviceEncryption /t REG_DWORD /d 1 /f;
+sc.exe stop BDESVC 2>nul;
+sc.exe config BDESVC start= disabled 2>nul;
+rem ---- Driver updates: keep blocked ----
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DriverSearching" /v DontSearchWindowsUpdate /t REG_DWORD /d 1 /f;
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DriverSearching" /v SearchOrderConfig /t REG_DWORD /d 0 /f;
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching" /v DontSearchWindowsUpdate /t REG_DWORD /d 1 /f;
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching" /v SearchOrderConfig /t REG_DWORD /d 0 /f;
 schtasks /delete /tn Forged-DefenderDisable /f;
 Remove-Item -Path "C:\Windows\Forged-DD.ps1" -Force -ErrorAction SilentlyContinue
 '@
@@ -465,8 +553,10 @@ $ServicesToDisable = @(
     "bttflt", "gencounter", "hyperkbd", "hypervideo", "vmgid", "vpci", "vid",
     "amdfendr", "amdfendrmgr",
     # Copilot / AI
-    "MicrosoftCopilotElevationService",
-    "InventorySvc", "WSAIFabricSvc"
+    "MicrosoftCopilotElevationService", "MicrosoftCopilotService",
+    "InventorySvc", "WSAIFabricSvc",
+    # BitLocker
+    "BDESVC"
 )
 
 $ServicesToManual = @(
@@ -596,7 +686,10 @@ $TasksToDisable = @(
     '\Microsoft\Windows\Hotpatch\Monitoring',
     '\Microsoft\Windows\Autochk\Proxy',
     '\Microsoft\Windows\CloudExperienceHost\CreateObjectTask',
-    '\Microsoft\Windows\UsageAndQualityInsights\UsageAndQualityInsights-MaintenanceTask'
+    '\Microsoft\Windows\UsageAndQualityInsights\UsageAndQualityInsights-MaintenanceTask',
+    # BitLocker
+    '\Microsoft\Windows\BitLocker\BitLocker Encrypt All Drives',
+    '\Microsoft\Windows\BitLocker\BitLocker MDM policy Refresh'
 )
 
 foreach ($taskPath in $TasksToDisable) {
@@ -608,13 +701,16 @@ foreach ($taskPath in $TasksToDisable) {
 # Disable Office tasks
 Invoke-TI 'powershell.exe -NoProfile -Command "Get-ScheduledTask -TaskPath ''\Microsoft\Office\*'' -ErrorAction SilentlyContinue | Disable-ScheduledTask -ErrorAction SilentlyContinue"'
 
-# Windows AI / Recall tasks
+# Windows AI / Recall / Copilot tasks
 $AITasks = @(
     '\Microsoft\Windows\WindowsAI\Recall\PolicyConfiguration',
     '\Microsoft\Windows\WindowsAI\Settings\InitialConfiguration',
     '\Microsoft\Windows\WindowsAI\ClickToDo\ModelCachingIdle',
     '\Microsoft\Windows\WindowsAI\ClickToDo\ModelCachingLimit',
-    '\Microsoft\Windows\WindowsAI\ClickToDo\ModelCachingUpdate'
+    '\Microsoft\Windows\WindowsAI\ClickToDo\ModelCachingUpdate',
+    '\Microsoft\Windows\WindowsAI\Settings\ReconcileAIDataAnalysis',
+    '\Microsoft\Windows\WindowsAI\Settings\PostUpgradeCompatibilityCheck',
+    '\Microsoft\Windows\WindowsAI\Recall\ReconcileEnrollment'
 )
 foreach ($task in $AITasks) {
     Try { Invoke-TI "schtasks /change /tn `"$task`" /disable" } Catch {}
@@ -632,13 +728,36 @@ Write-Log -Message "Scheduled task debloat complete."
 Write-Log -Level HEADER -Message "PHASE 6: Power, BCDEdit & Performance"
 
 # --- Power plan ---
-$UltGUID = "e9a42b02-d5df-448d-aa00-03f14749eb61"
-Try {
-    $existingPlan = powercfg /l 2>&1 | Select-String $UltGUID
-    if (-not $existingPlan) { powercfg -duplicatescheme $UltGUID | Out-Null }
-    powercfg /setactive $UltGUID
-    Write-Log -Message "Ultimate Performance power plan activated."
-} Catch { Write-Log -Level WARN -Message "Could not set Ultimate Performance plan." }
+# Ultimate Performance is a hidden template on non-Workstation editions.
+# powercfg -duplicatescheme creates a copy with a NEW random GUID, so we
+# must search by scheme NAME ("Ultimate Performance") not by known GUID.
+$UltGUID   = "e9a42b02-d5df-448d-aa00-03f14749eb61"
+$HighGUID  = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"
+
+# Duplicate Ultimate Performance template (silent if it already exists)
+$null = powercfg -duplicatescheme $UltGUID 2>&1 | Out-Null
+Start-Sleep -Milliseconds 500
+
+# Find ANY scheme named "Ultimate Performance" (GUID may differ from template)
+$allSchemes = powercfg /l 2>&1 | Out-String
+$ultLine = ($allSchemes -split '\n' | Where-Object { $_ -match 'Ultimate Performance' } | Select-Object -First 1)
+
+if ($ultLine) {
+    # Extract the GUID from the matched line
+    $foundGuid = ($ultLine -replace '.*GUID:\s*([a-fA-F0-9-]+).*', '$1').Trim()
+    if ($foundGuid) {
+        powercfg /setactive $foundGuid
+        Write-Log -Message "Ultimate Performance power plan activated ($foundGuid)."
+    }
+} else {
+    # Fall back to High Performance
+    Try {
+        powercfg /setactive $HighGUID
+        Write-Log -Message "High Performance power plan activated (Ultimate Performance unavailable)."
+    } Catch {
+        Write-Log -Level WARN -Message "Could not set any performance power plan."
+    }
+}
 
 # Core parking off
 Try {
@@ -883,7 +1002,7 @@ Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRest
 # RealTimeIsUniversal: fix clock desync when dual-booting with Linux (Revision)
 Set-RegValue -Path "HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation" -Name "RealTimeIsUniversal" -Value 1 -Type "DWord"
 
-# Disable WPBT (Windows Platform Binary Table — prevents OEM bloat injection at boot)
+# Disable WPBT (Windows Platform Binary Table -- prevents OEM bloat injection at boot)
 Set-RegValue -Path "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "DisableWpbtExecution" -Value 1 -Type "DWord"
 Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" -Name "CopyFileBufferedSynchronousIo" -Value 1 -Type "DWord"
 
@@ -954,7 +1073,7 @@ Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting" -Na
 Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\PCHealth\ErrorReporting" -Name "DoReport" -Value 0 -Type "DWord"
 
 # --- Cloud content off ---
-# Disable search suggestions (HKLM level — removes ads from start menu search)
+# Disable search suggestions (HKLM level -- removes ads from start menu search)
 Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableSearchBoxSuggestions" -Value 1 -Type "DWord"
 Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Name "DisableCloudOptimizedContent" -Value 1 -Type "DWord"
 Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Name "DisableWindowsConsumerFeatures" -Value 1 -Type "DWord"
@@ -1005,11 +1124,101 @@ Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\ProtectedE
 
 # --- Disable Copilot & Recall ---
 Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Name "DisableAIDataAnalysis" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -Value 1 -Type "DWord"
 Set-RegValue -Path "HKCU\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -Value 1 -Type "DWord"
 Set-RegValue -Path "HKCU\Software\Microsoft\Windows\Shell\Copilot\BingChat" -Name "IsUserEligible" -Value 0 -Type "DWord"
 Set-RegValue -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowCopilotButton" -Value 0 -Type "DWord"
 Set-RegValue -Path "HKCU\Software\Policies\Microsoft\Windows\WindowsAI" -Name "DisableAIDataAnalysis" -Value 1 -Type "DWord"
 Set-RegValue -Path "HKCU\Software\Policies\Microsoft\Windows\WindowsAI" -Name "AllowRecallEnablement" -Value 0 -Type "DWord"
+# Copilot IFEO blocks -- prevents Copilot.exe from ever launching
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\Copilot.exe" -Name "Debugger" -Value "%SYSTEMROOT%\System32\taskkill.exe" -Type "String"
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\CopilotNative.exe" -Name "Debugger" -Value "%SYSTEMROOT%\System32\taskkill.exe" -Type "String"
+# Disable Copilot & AI services
+@("MicrosoftCopilotElevationService","MicrosoftCopilotService","WSAIFabricSvc") | ForEach-Object {
+    Invoke-TI-Quiet "sc.exe stop $_"
+    Invoke-TI-Quiet "sc.exe config $_ start= disabled"
+}
+# Kill any running Copilot processes
+@("Copilot","CopilotNative","CopilotHost") | ForEach-Object {
+    Try { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue } Catch {}
+}
+
+# --- BitLocker: prevent automatic device encryption (Win 11 24H2+) ---
+Set-RegValue -Path "HKLM\SYSTEM\CurrentControlSet\Control\BitLocker" -Name "PreventDeviceEncryption" -Value 1 -Type "DWord"
+Invoke-TI-Quiet "sc.exe stop BDESVC"
+Invoke-TI-Quiet "sc.exe config BDESVC start= disabled"
+# Disable BitLocker scheduled tasks
+@('\Microsoft\Windows\BitLocker\BitLocker Encrypt All Drives','\Microsoft\Windows\BitLocker\BitLocker MDM policy Refresh') | ForEach-Object {
+    Invoke-TI "schtasks /change /tn `"$_`" /disable"
+}
+
+# --- Start Menu: HKLM PolicyManager CSP — forces zero pins at device level (Revision) ---
+# This is a machine policy, not a user tweak. ConfigureStartPins with empty
+# pinnedList forces Windows to show NO pinned tiles for ALL users.
+# Write to BOTH current and default policy paths for belt-and-suspenders.
+@("HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\Start","HKLM\SOFTWARE\Microsoft\PolicyManager\default\device\Start") | ForEach-Object {
+    $cspPath = $_
+    Set-RegValue -Path $cspPath -Name "ConfigureStartPins" -Value '{"pinnedList":[{"packagedAppId":"windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel"}]}' -Type "String"
+    # Hide all start menu folder pins (Documents, Downloads, Music, etc.)
+    $StartFolders = @("Documents","Downloads","FileExplorer","HomeGroup","Music","Network","PersonalFolder","Pictures","Videos")
+    foreach ($f in $StartFolders) {
+        Set-RegValue -Path $cspPath -Name "AllowPinnedFolder$f" -Value 0 -Type "DWord"
+        Set-RegValue -Path $cspPath -Name "AllowPinnedFolder${f}_ProviderSet" -Value 1 -Type "DWord"
+    }
+    # Keep Settings folder visible (power users need it)
+    Set-RegValue -Path $cspPath -Name "AllowPinnedFolderSettings" -Value 1 -Type "DWord"
+}
+
+# --- AppCompat: kill Program Compatibility Assistant + telemetry (Revision) ---
+Set-RegValue -Path "HKLM\Software\Policies\Microsoft\Windows\AppCompat" -Name "DisableEngine" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\Software\Policies\Microsoft\Windows\AppCompat" -Name "AITEnable" -Value 0 -Type "DWord"
+Set-RegValue -Path "HKLM\Software\Policies\Microsoft\Windows\AppCompat" -Name "DisableUAR" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\Software\Policies\Microsoft\Windows\AppCompat" -Name "DisablePCA" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\Software\Policies\Microsoft\Windows\AppCompat" -Name "DisableInventory" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\Software\Policies\Microsoft\Windows\AppCompat" -Name "SbEnable" -Value 1 -Type "DWord"
+
+# --- Push notifications: block cloud-sourced notification spam (Revision) ---
+Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications" -Name "NoCloudApplicationNotification" -Value 1 -Type "DWord"
+
+# --- System: EnableLinkedConnections (mapped drives in elevated context), MSA optional (Revision) ---
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLinkedConnections" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Name "MSAOptional" -Value 1 -Type "DWord"
+
+# --- EdgeUI: disable help tips + Windows Feeds + Chat icon + Dsh (Revision) ---
+Set-RegValue -Path "HKLM\Software\Policies\Microsoft\Windows\EdgeUI" -Name "DisableHelpSticker" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Dsh" -Name "AllowNewsAndInterests" -Value 0 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds" -Name "EnableFeeds" -Value 0 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Chat" -Name "ChatIcon" -Value 3 -Type "DWord"
+
+# --- OOBE: bypass network requirement + unsupported hardware ---
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" -Name "BypassNRO" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\SYSTEM\Setup\MoSetup" -Name "AllowUpgradesWithUnsupportedTPMOrCPU" -Value 1 -Type "DWord"
+
+# --- Upgrade notifications + Media Player auto-update OFF (Revision) ---
+Set-RegValue -Path "HKLM\SYSTEM\Setup\UpgradeNotification" -Name "UpgradeAvailable" -Value 0 -Type "DWord"
+Set-RegValue -Path "HKLM\Software\Policies\Microsoft\WindowsMediaPlayer" -Name "DisableAutoUpdate" -Value 1 -Type "DWord"
+
+# --- WU UX: hide Media Creation Tool link, disable restart notifications ---
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "HideMCTLink" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "RestartNotificationsAllowed2" -Value 0 -Type "DWord"
+
+# --- Office: disable background ClickToRun logging (Revision) ---
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\ClickToRun\OverRide" -Name "DisableLogManagement" -Value 1 -Type "DWord"
+
+# --- Block Store results in Windows Search (25H2) (Revision) ---
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\WinStore.Tasks.WindowsSearchTask" -Name "ActivationType" -Value 4294967295 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\WinStore.Tasks.WindowsSearchTask" -Name "Server" -Value "" -Type "String"
+
+# --- Block Xbox Gaming AI Companion DLL from loading (Revision) ---
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Microsoft.Xbox.GamingAI.Companion.Host.GamingCompanionHostOptions" -Name "ActivationType" -Value 4294967295 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Microsoft.Xbox.GamingAI.Companion.Host.GamingCompanionHostOptions" -Name "Server" -Value "" -Type "String"
+
+# --- Prevent WebView2 from spawning inside SearchHost (25H2) (Revision) ---
+Set-RegValue -Path "HKLM\SYSTEM\ControlSet001\Policies\Microsoft\FeatureManagement\Overrides" -Name "1694661260" -Value 0 -Type "DWord"
+
+# --- Block Outlook + DevHome pre-install via WU Orchestrator (Revision) ---
+Try { Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\DevHomeUpdate" -Recurse -Force -ErrorAction SilentlyContinue } Catch {}
+Try { Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\OutlookUpdate" -Recurse -Force -ErrorAction SilentlyContinue } Catch {}
 
 # --- Block bloatware auto-install ---
 Set-RegValue -Path "HKLM\Software\Microsoft\Windows\CurrentVersion\Communications" -Name "ConfigureChatAutoInstall" -Value 0 -Type "DWord"
@@ -1149,12 +1358,14 @@ $AppxToRemove = @(
     'Microsoft.OneDriveSync', 'microsoft.microsoftskydrive',
     'MSTeams', 'MicrosoftTeams', 'Microsoft.MicrosoftTeams',
     '5319275A.WhatsAppDesktop', 'Microsoft.LinkedIn',
-    '7EE7776C.LinkedInforWindows'
+    '7EE7776C.LinkedInforWindows',
+    # Windows 10-specific bloat:
+    'Microsoft.Office.OneNote', 'Microsoft.MSPaint'
 )
 
 $StorePath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore'
 
-# Provisioned package removal only — works from SYSTEM context without crashing.
+# Provisioned package removal only -- works from SYSTEM context without crashing.
 # Per-user Remove-AppxPackage fails under SYSTEM; provisioning removal prevents
 # packages from installing for new users.
 foreach ($nameFragment in $AppxToRemove) {
@@ -1182,6 +1393,17 @@ Write-Log -Message "AppX removal complete."
 
 Write-Log -Level HEADER -Message "PHASE 13: Cleanup & Reboot"
 
+
+# --- Re-run start menu cleanup after reboot (pins survive OOBE, need post-reboot sweep) ---
+# Inline script runs W11STARTMENU.ps1 then self-destructs the entire Scripts folder
+$startMenuRunOnce = @'
+C:\Windows\Setup\Scripts\W11STARTMENU.ps1
+Remove-Item -Path "C:\Windows\Setup\Scripts" -Recurse -Force -ErrorAction SilentlyContinue
+'@
+$startMenuRunOncePath = "$env:TEMP\ForgedStartMenu.ps1"
+[System.IO.File]::WriteAllText($startMenuRunOncePath, $startMenuRunOnce)
+Set-RegValue -Path "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" -Name "ForgedStartMenu" -Value "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File $startMenuRunOncePath" -Type "String"
+Write-Log -Message "Start menu cleanup scheduled to re-run after reboot."
 
 # Remove PC Health Check
 Try {
@@ -1222,13 +1444,12 @@ Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Adva
 
 Write-Log -Level HEADER -Message "OPTIMIZATION COMPLETE. SYSTEM WILL REBOOT IN 10 SECONDS."
 
-# Self-destruct and reboot
-Try {
-    $cleanupCmd = "Start-Sleep -Seconds 10; Remove-Item -Path '$ScriptPath' -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'C:\Windows\Setup\Scripts' -Recurse -Force -ErrorAction SilentlyContinue; shutdown /r /f /t 3"
-    Start-Process powershell.exe -ArgumentList "-NoProfile -WindowStyle Hidden -Command $cleanupCmd" -NoNewWindow -ErrorAction SilentlyContinue
-} Catch {
-    # fallback: just reboot
-    shutdown /r /f /t 5
-}
+    # Self-destruct (keep W11STARTMENU.ps1 for RunOnce start menu re-clean)
+    Try {
+        $cleanupCmd = "Start-Sleep -Seconds 10; Remove-Item -Path '$ScriptPath' -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'C:\Windows\Setup\Scripts\Forge-PostInstall.ps1' -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'C:\Windows\Setup\Scripts\RemoveEdge.ps1' -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'C:\Windows\Setup\Scripts\onedrive.bat' -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'C:\Windows\Setup\Scripts\taskbar.bat' -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'C:\Windows\Setup\Scripts\driver-exclude.reg' -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'C:\Windows\Setup\Scripts\services-disable.reg' -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'C:\Windows\Setup\Scripts\trpad.exe' -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'C:\Windows\Setup\Scripts\Forged.png' -Force -ErrorAction SilentlyContinue; shutdown /r /f /t 3"
+        Start-Process powershell.exe -ArgumentList "-NoProfile -WindowStyle Hidden -Command $cleanupCmd" -NoNewWindow -ErrorAction SilentlyContinue
+    } Catch {
+        shutdown /r /f /t 5
+    }
 
 # End of Script

@@ -12,7 +12,7 @@ for %%k in (
 	"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OneDrive"
 ) do (
 	for /f "tokens=2,*" %%a in ('reg query %%k /v UninstallString 2^>nul ^| findstr /i "UninstallString"') do (
-		%%b > nul 2>&1
+		echo %%b | findstr /i "MsiExec" > nul && (%%b /quiet /norestart > nul 2>&1) || (%%b > nul 2>&1)
 	)
 )
 
