@@ -31,20 +31,22 @@ check_deps() {
     log_info "All dependencies found."
 }
 
-# --- find Pro edition index ---
+# --- find Pro edition index; also detects Windows version (10 or 11) ---
 find_pro_index() {
     local wim="$1"
     local output
     output=$(wimlib-imagex info "$wim" 2>&1)
-    local index
-    index=$(echo "$output" | awk '/^Index:/{idx=$2} /^Name:[[:space:]]*Windows 11 Pro$/{print idx; exit}')
+    local index edition
+    # Match both "Windows 10 Pro" and "Windows 11 Pro" — store edition name
+    index=$(echo "$output" | awk '/^Index:/{idx=$2} /^Name:[[:space:]]*Windows (10|11) Pro$/{print idx; exit}')
+    edition=$(echo "$output" | awk '/^Name:[[:space:]]*Windows (10|11) Pro$/{gsub(/^Name:[[:space:]]*/,""); print; exit}')
     if [[ -z "$index" ]]; then
         log_error "Could not find Windows Pro edition in WIM. Available editions:"
         wimlib-imagex info "$wim"
         exit 1
     fi
-    log_info "Found Pro edition at index $index" >&2
-    echo "$index"
+    log_info "Found ${edition} at index $index" >&2
+    echo "$index|$edition"
 }
 
 # --- isolate Pro edition in a single export pass ---
@@ -107,6 +109,11 @@ inject_payload() {
         log_info "Injected driver-exclude.reg"
     fi
 
+    if [[ -f "${PAYLOAD_DIR}/services-disable.reg" ]]; then
+        cp "${PAYLOAD_DIR}/services-disable.reg" "${dest}/"
+        log_info "Injected services-disable.reg"
+    fi
+
     if [[ -f "${PAYLOAD_DIR}/onedrive.bat" ]]; then
         cp "${PAYLOAD_DIR}/onedrive.bat" "${dest}/"
         log_info "Injected onedrive.bat"
@@ -122,6 +129,11 @@ inject_payload() {
         log_info "Injected W11STARTMENU.ps1"
     fi
 
+    if [[ -f "${PAYLOAD_DIR}/trpad.exe" ]]; then
+        cp "${PAYLOAD_DIR}/trpad.exe" "${dest}/"
+        log_info "Injected trpad.exe (TinyRetroPad)"
+    fi
+
     # Inject clean LayoutModification.xml into Default User (prevents default pins)
     local_layout_dir="${mount}/Users/Default/AppData/Local/Microsoft/Windows/Shell"
     mkdir -p "$local_layout_dir"
@@ -129,6 +141,13 @@ inject_payload() {
         cp "${PAYLOAD_DIR}/LayoutModification.xml" "$local_layout_dir/LayoutModification.xml"
         log_info "Injected LayoutModification.xml -- clean taskbar and start menu"
     fi
+    # Nuke any cached start menu databases so Windows rebuilds from our clean layout
+    rm -f "${mount}/Users/Default/AppData/Local/Packages/Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy/LocalState/start.bin" 2>/dev/null
+    rm -f "${mount}/Users/Default/AppData/Local/Packages/Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy/LocalState/start2.bin" 2>/dev/null
+    # Also nuke from any staged user profile locations
+    find "${mount}/Users" -name "start.bin" -delete 2>/dev/null
+    find "${mount}/Users" -name "start2.bin" -delete 2>/dev/null
+    find "${mount}/Users" -name "DefaultLayouts.xml" -delete 2>/dev/null
 }
 
 # --- offline AppX debloat: remove bloatware from WIM before it ever boots ---
@@ -164,6 +183,8 @@ debloat_wim() {
         "MicrosoftWindows.Client.WebExperience"
         "Microsoft.OneDriveSync" "microsoft.microsoftskydrive"
         "MSTeams" "MicrosoftTeams" "Microsoft.WindowsStore"
+        # Windows 10-specific:
+        "Microsoft.Office.OneNote" "Microsoft.MSPaint"
     )
 
     local apps_dir
@@ -186,9 +207,18 @@ debloat_wim() {
         done
     fi
 
+    # OneDrive: nuke setup stubs from both System32 and SysWOW64
     local od_exe
-    od_exe="${mount}/Windows/SysWOW64/OneDriveSetup.exe"
-    [[ -f "$od_exe" ]] && rm -f "$od_exe"
+    for od_exe in \
+        "${mount}/Windows/SysWOW64/OneDriveSetup.exe" \
+        "${mount}/Windows/System32/OneDriveSetup.exe"; do
+        [[ -f "$od_exe" ]] && rm -f "$od_exe"
+    done
+
+    # OneDrive scheduled task XML stubs (these trigger re-install on first logon)
+    local od_tasks
+    od_tasks="${mount}/Windows/System32/Tasks/Microsoft/Windows/OneDrive*"
+    rm -f $od_tasks 2>/dev/null
 
     log_info "WIM debloat complete."
 }
@@ -224,13 +254,15 @@ build_iso() {
 # --- main ---
 main() {
     check_deps
-
     local ISO_INPUT="${1:-}"
-    local ISO_OUTPUT="${2:-${SCRIPT_DIR}/Forged-Win11.iso}"
+    # Output name auto-detected below after we know the Windows version
+    local ISO_OUTPUT="${2:-}"
 
     if [[ -z "$ISO_INPUT" ]]; then
         echo "Usage: $0 <path-to-windows-iso> [output-iso-path]"
-        echo "Example: $0 ../en-us_windows_11_*.iso ./Forged-Win11-25H2.iso"
+        echo "       Supports both Windows 10 and Windows 11 ISOs (auto-detected)."
+        echo "Example: $0 Win11_25H2.iso"
+        echo "Example: $0 Win10_22H2.iso ./Forged-Win10.iso"
         exit 1
     fi
 
@@ -277,8 +309,21 @@ main() {
     fi
 
     # step 2: find & isolate Pro edition
-    local PRO_INDEX
-    PRO_INDEX=$(find_pro_index "$WIM_FILE")
+    local PRO_RESULT PRO_INDEX WIN_VER
+    PRO_RESULT=$(find_pro_index "$WIM_FILE")
+    PRO_INDEX="${PRO_RESULT%%|*}"
+    WIN_VER="${PRO_RESULT##*|}"
+
+    # Auto-detect output name if not specified
+    if [[ -z "$ISO_OUTPUT" ]]; then
+        if [[ "$WIN_VER" == *"Windows 10"* ]]; then
+            ISO_OUTPUT="${SCRIPT_DIR}/Forged-Win10.iso"
+        else
+            ISO_OUTPUT="${SCRIPT_DIR}/Forged-Win11.iso"
+        fi
+    fi
+    log_info "Target: ${WIN_VER} -> ${ISO_OUTPUT}"
+
     isolate_pro_edition "$WIM_FILE" "$PRO_INDEX"
 
     # step 3: mount WIM RW
@@ -308,6 +353,8 @@ main() {
     fi
 
     # step 6: build ISO
+    # Clean up any wimlib staging files (leftover from commit, breaks xorrisofs)
+    find "${EXTRACT_DIR}/sources/" -maxdepth 1 -name "*.staging*" -delete 2>/dev/null || true
     build_iso "$EXTRACT_DIR" "$ISO_OUTPUT" "FORGED"
 
     # step 7: cleanup work dir
