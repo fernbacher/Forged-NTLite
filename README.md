@@ -8,7 +8,7 @@
 
 ## Who Is This For?
 
-- People who dual-boot **CachyOS (or any Linux)** and Windows 11.
+- People who dual-boot **CachyOS (or any Linux)** and Windows 11/10.
 - Gamers who need Windows only for titles like *Valorant*, *Fortnite*, *PUBG*, *League of Legends*, *Faceit* – anything with kernel anti-cheat.
 - Users who want a **minimal, performance-first Windows** with zero bloat, no telemetry, no Defender, no Edge and zero Microsoft account nonsense.
 - Anyone who wants to build the ISO **from Linux** without owning a Windows machine.
