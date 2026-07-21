@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Build Guide for Forged — a Linux-native Windows 11 ISO builder.">
+  <title>Build Guide — Forged</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <div class="layout">
+    <button class="mobile-nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="sidebar" id="sidebar">
+      <nav aria-label="Main navigation">
+        <ul class="sidebar-nav" role="list">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="build.html" class="active">Build Guide</a></li>
+          <li><a href="dual-boot.html">Dual-Boot</a></li>
+          <li><a href="security.html">Security</a></li>
+          <li><a href="credits.html">Credits</a></li>
+        </ul>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="https://discord.gg/forged" class="sidebar-discord" target="_blank" rel="noopener noreferrer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+          Discord
+        </a>
+      </div>
+    </aside>
+    <main class="main-content" id="main" aria-label="Main content">
+      <article class="content-page">
+        <h1>Build Guide</h1>
+        <p>You need a Linux machine and a Windows 11/10 ISO. Grab one from Microsoft or <a href="https://massgrave.dev/windows_11_links" target="_blank" rel="noopener noreferrer">massgrave.dev</a>. Then run a single command.</p>
+        <h2>Prerequisites</h2>
+        <p>Install the build dependencies:</p>
+        <pre><code># Arch Linux / CachyOS
+sudo pacman -S p7zip wimlib libisoburn python3
+
+# Debian / Ubuntu
+sudo apt update
+sudo apt install --needed p7zip-full wimtools xorriso python3
+
+# Fedora
+sudo dnf install -y p7zip wimlib-utils xorriso python3
+
+</code></pre>
+        <h2>Clone the Repository</h2>
+        <pre><code>git clone https://github.com/fernbacher/Forged.git
+cd Forged</code></pre>
+        <h2>Build the ISO</h2>
+        <p>Point the script at your Windows ISO:</p>
+        <pre><code>./forge-iso.sh /path/to/en-us_windows_11_consumer_editions_version_26h1_*.iso</code></pre>
+        <p>The script does everything in one shot:</p>
+        <ol>
+          <li>Extracts the ISO with <code>7z</code></li>
+          <li>Finds the <strong>Windows 11/10 Pro</strong> index, exports only that edition</li>
+          <li>Mounts the WIM with <code>wimlib-imagex</code></li>
+          <li>Injects all payload files and strips AppX bloat offline</li>
+          <li>Commits changes, builds a UEFI+BIOS hybrid ISO with <code>xorrisofs</code></li>
+        </ol>
+        <div class="content-note">
+          <strong>Build time:</strong> 5–10 minutes, depending on storage speed. Fully automated.
+        </div>
+        <h2>Output</h2>
+        <p>You'll get <code>Forged-Win11.iso</code> (or <code>Forged-Win10.iso</code>) in the <code>Forged/</code> directory. Flash it with Ventoy, Rufus, or <code>dd</code>.</p>
+        <div class="content-note">
+          <strong>Browsers are not included.</strong> Forged removes Edge completely. Bring your own browser installer on your USB drive.
+        </div>
+        <h2>Post-Install</h2>
+        <p>The ISO includes <code>autounattend.xml</code> — it bypasses TPM/SecureBoot, creates a local admin account, skips OOBE privacy screens, and auto-launches the Forged script on first login. Let it run.</p>
+        <h2>Recommendations Once You're on Forged</h2>
+        <ul>
+          <li>Install <a href="https://github.com/abbodi1406/dotNetFx35W10/releases" target="_blank" rel="noopener noreferrer">dotNetFx35</a> on Windows 10</li>
+          <li>Use <a href="https://github.com/mjishnu/alt-app-installer" target="_blank" rel="noopener noreferrer">Alt App Installer</a> to install NVIDIA Control Panel without the Microsoft Store</li>
+          <li>Install <a href="https://github.com/abbodi1406/vcredist" target="_blank" rel="noopener noreferrer">VC Redist</a> and <a href="https://www.microsoft.com/en-US/download/details.aspx?id=35" target="_blank" rel="noopener noreferrer">DirectX</a></li>
+          <li>Install <a href="https://github.com/Open-Shell/Open-Shell-Menu/releases" target="_blank" rel="noopener noreferrer">Open-Shell</a> on Windows 11 if you want a classic start menu</li>
+          <li>Run <a href="https://github.com/AveYo/Gaming/blob/main/ms-gamebar-annoyance.bat" target="_blank" rel="noopener noreferrer">ms-gamebar-annoyance.bat</a> to kill the Game Bar pop-up</li>
+        </ul>
+      </article>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Security trade-offs of Forged Windows — what's disabled and why.">
+  <title>Security — Forged</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <div class="layout">
+    <button class="mobile-nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="sidebar" id="sidebar">
+      <nav aria-label="Main navigation">
+        <ul class="sidebar-nav" role="list">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="build.html">Build Guide</a></li>
+          <li><a href="dual-boot.html">Dual-Boot</a></li>
+          <li><a href="security.html" class="active">Security</a></li>
+          <li><a href="credits.html">Credits</a></li>
+        </ul>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="https://discord.gg/forged" class="sidebar-discord" target="_blank" rel="noopener noreferrer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+          Discord
+        </a>
+      </div>
+    </aside>
+    <main class="main-content" id="main" aria-label="Main content">
+      <article class="content-page">
+        <h1>Security &amp; Trade-Offs</h1>
+        <p>Forged disables a lot of Windows components for performance and privacy. Here's exactly what's changed and what you're trading away. <strong>If you need real-time antivirus, Forged is not for you.</strong></p>
+
+        <h2>Windows Defender — Fully Annihilated</h2>
+        <ul>
+          <li>Services disabled (<code>Start=4</code>)</li>
+          <li><code>TamperProtection=0</code>, <code>DisableAntiSpyware=1</code></li>
+          <li>Scheduled task re-kills Defender processes</li>
+          <li>Boot-time safety task prevents reactivation</li>
+          <li>IFEO blocks on <code>MsMpEng.exe</code> and related binaries</li>
+          <li><code>MpCmdRun.exe</code> renamed</li>
+        </ul>
+        <p><strong>Trade-off:</strong> No real-time malware protection. You're responsible for what you run. Fine for a gaming-only install where you only launch Steam and games.</p>
+
+        <h2>Microsoft Edge — Completely Removed</h2>
+        <ul>
+          <li>Browser, updater, and DevTools removed via XOS RemoveEdge</li>
+          <li>Uses region spoofing to bypass Microsoft's uninstall restrictions</li>
+          <li><strong>WebView2 Runtime preserved</strong> for app compatibility</li>
+        </ul>
+        <p><strong>Trade-off:</strong> No built-in browser. Bring your own on a USB drive. Apps that embed Edge WebView still work — the runtime is left intact.</p>
+
+        <h2>UAC — Disabled</h2>
+        <p><code>EnableLUA=0</code>. Everything runs as admin. No elevation prompts.</p>
+        <p><strong>Trade-off:</strong> Any process can make system-level changes without asking. Convenient on a machine you control, dangerous if you run untrusted software.</p>
+
+        <h2>Windows Update — Paused Until 2038</h2>
+        <ul>
+          <li>Update service paused with a far-future date</li>
+          <li>WSUS server nulled</li>
+          <li>Driver updates blocked via registry</li>
+          <li>Scheduled tasks for automatic maintenance disabled</li>
+        </ul>
+        <p><strong>Trade-off:</strong> No security patches, no driver updates, no feature updates. Manual update checks may partially revert some tweaks. You're freezing Windows in its current state.</p>
+
+        <h2>VBS / HVCI — Toggle Scripts on Desktop</h2>
+        <p>Two scripts on the desktop: <code>VBS-ON.bat</code> and <code>VBS-OFF.bat</code>.</p>
+        <ul>
+          <li><strong>VBS OFF</strong> (default): Better performance, lower latency.</li>
+          <li><strong>VBS ON:</strong> Required for any kernel anti-cheat that doesn't work on Linux (Valorant, FACEIT, etc.). Exception: League of Legends doesn't need it. Not required on Windows 10.</li>
+        </ul>
+
+        <h2>Telemetry &amp; Privacy</h2>
+        <ul>
+          <li>All telemetry services disabled</li>
+          <li>Cortana, Bing integration, web search removed</li>
+          <li>Advertising ID disabled</li>
+          <li>Activity history and clipboard sync disabled</li>
+          <li>Diagnostic data set to minimum</li>
+        </ul>
+
+        <h2>Network Optimizations</h2>
+        <ul>
+          <li>Nagle's algorithm disabled</li>
+          <li>Network throttling index maxed</li>
+          <li>DNS cache increased</li>
+          <li>TCP autotuning set to normal</li>
+        </ul>
+
+        <hr>
+        <p><strong>Bottom line:</strong> Forged is a "get in, play your game, get out" Windows install. Stripped down for maximum gaming performance with zero regard for security best practices. Use it for what it's designed for: running kernel anti-cheat games that won't work on Linux.</p>
+      </article>
+    </main>
+  </div>
+  <script src="nav.js"></script>
+</body>
+</html>
