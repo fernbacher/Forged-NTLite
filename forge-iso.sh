@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ==============================================================================
-# Forged ISO Builder — Linux-native Windows 11 Gaming ISO creation
+# Forged ISO Builder — Linux-native Windows Gaming ISO creation
 # ==============================================================================
 # Replaces NTLITE. Extracts the Windows ISO, injects payload, writes
 # autounattend.xml, and repacks to a bootable UEFI+BIOS hybrid ISO.
