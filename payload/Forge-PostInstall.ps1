@@ -1,7 +1,7 @@
 <#
     ================================================================================================================
-    FORGED -- Post-Installation Optimization Script for Windows 11 25H2+
-    Version: 2.0 (Linux ISO Builder Edition)
+    FORGED -- Post-Installation Optimization Script for Windows 11/10
+    Version: 2.2 (Linux ISO Builder Edition)
     ================================================================================================================
 
     DESCRIPTION:
@@ -164,6 +164,8 @@ if ($CurrentUser -match "^NT AUTHORITY\\(SYSTEM|TrustedInstaller)$") {
     # Notification & tray: block balloon ads, prevent auto-hiding tray icons (Revision)
     Set-RegValue -Path "HKCU\Software\Policies\Microsoft\Windows\Explorer" -Name "NoBalloonFeatureAdvertisements" -Value 1 -Type "DWord"
     Set-RegValue -Path "HKCU\Software\Policies\Microsoft\Windows\Explorer" -Name "NoAutoTrayNotify" -Value 1 -Type "DWord"
+    Set-RegValue -Path "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Notifications\Settings\Windows.SystemToast.SecurityAndMaintenance" -Name "Enabled" -Value 0 -Type "DWord"
+Get-Service -Name "WpnUserService*" | Restart-Service -Force -ErrorAction SilentlyContinue
     # Hide People bar from taskbar (Win10)
     Set-RegValue -Path "HKCU\Software\Policies\Microsoft\Windows\Explorer" -Name "HidePeopleBar" -Value 1 -Type "DWord"
     # Suppress "Let's finish setting up your device" nag (Scoobe)
@@ -310,15 +312,15 @@ if ($CurrentUser -match "^NT AUTHORITY\\(SYSTEM|TrustedInstaller)$") {
 
     # Create VBS toggle scripts on desktop (anti-cheat games)
     @"
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v EnableVirtualizationBasedSecurity /t REG_DWORD /d 1 /f
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 1 /f
-reg add "HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy" /v VerifiedAndReputablePolicyState /t REG_DWORD /d 1 /f
 bcdedit /set hypervisorlaunchtype auto
 echo VBS enabled. REBOOT REQUIRED.
 pause
 "@ | Set-Content -Path "$env:USERPROFILE\Desktop\VBS-ON.bat" -Force
     @"
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v EnableVirtualizationBasedSecurity /t REG_DWORD /d 0 /f
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /t REG_DWORD /d 0 /f
-reg add "HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy" /v VerifiedAndReputablePolicyState /t REG_DWORD /d 0 /f
 bcdedit /set hypervisorlaunchtype off
 echo VBS disabled. REBOOT REQUIRED.
 pause
@@ -411,6 +413,19 @@ Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\WTDS\Components" -N
 Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" -Name "SmartScreenEnabled" -Value "Off" -Type "String"
 Set-RegValue -Path "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer" -Name "SmartScreenEnabled" -Value "Off" -Type "String"
 Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableSmartScreen" -Value 0 -Type "DWord"
+Set-RegValue -Path "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost" -Name "EnableWebContentEvaluation" -Value 0 -Type "DWord"
+# (default) value of this key -- Set-RegValue with no -Name writes to (default)
+Set-RegValue -Path "HKCU\SOFTWARE\Microsoft\Edge\SmartScreenEnabled" -Value 0 -Type "DWord"
+
+# Real-Time Protection policy disable (belt-and-suspenders alongside service kill)
+Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" -Name "DisableScanOnRealtimeEnable" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" -Name "DisableBehaviorMonitoring" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Microsoft Antimalware\Real-Time Protection" -Name "DisableScanOnRealtimeEnable" -Value 1 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Microsoft Antimalware\Real-Time Protection" -Name "DisableOnAccessProtection" -Value 1 -Type "DWord"
+
+# SpyNet: stop cloud sample submission
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows Defender\Spynet" -Name "SpyNetReporting" -Value 0 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows Defender\Spynet" -Name "SubmitSamplesConsent" -Value 0 -Type "DWord"
 
 # VBS/HVCI off
 Set-RegValue -Path "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" -Name "Enabled" -Value 0 -Type "DWord"
@@ -880,6 +895,12 @@ Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia
 Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "SystemResponsiveness" -Value 10 -Type "DWord"
 Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\Psched" -Name "TimerResolution" -Value 10 -Type "DWord"
 
+# --- MMCSS "Games" task profile: boosts scheduler priority for fullscreen games (PC-Tuning / GamingPCSetup) ---
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "GPU Priority" -Value 8 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "Priority" -Value 6 -Type "DWord"
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "Scheduling Category" -Value "High" -Type "String"
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "SFIO Priority" -Value "High" -Type "String"
+
 # --- SvcHost split disable ---
 $SvcHostServices = @("BFE","DcomLaunch","mpssvc","PlugPlay","Power","SamSs","EventSystem","CryptSvc","Dhcp","Dnscache",
     "DisplayEnhancementService","PcaSvc","WdiSystemHost","AudioEndpointBuilder","Appinfo","BITS","gpsvc","IKEEXT",
@@ -1152,7 +1173,7 @@ Invoke-TI-Quiet "sc.exe config BDESVC start= disabled"
     Invoke-TI "schtasks /change /tn `"$_`" /disable"
 }
 
-# --- Start Menu: HKLM PolicyManager CSP — forces zero pins at device level (Revision) ---
+# --- Start Menu: HKLM PolicyManager CSP -- forces zero pins at device level (Revision) ---
 # This is a machine policy, not a user tweak. ConfigureStartPins with empty
 # pinnedList forces Windows to show NO pinned tiles for ALL users.
 # Write to BOTH current and default policy paths for belt-and-suspenders.
@@ -1212,6 +1233,9 @@ Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Wi
 # --- Block Xbox Gaming AI Companion DLL from loading (Revision) ---
 Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Microsoft.Xbox.GamingAI.Companion.Host.GamingCompanionHostOptions" -Name "ActivationType" -Value 4294967295 -Type "DWord"
 Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Microsoft.Xbox.GamingAI.Companion.Host.GamingCompanionHostOptions" -Name "Server" -Value "" -Type "String"
+
+# --- Block GamePresenceWriter activation (stops the "Get Xbox Game Bar" toast on first fullscreen launch) (ValleyOfDoom) ---
+Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Windows.Gaming.GameBar.PresenceServer.Internal.PresenceWriter" -Name "ActivationType" -Value 0 -Type "DWord"
 
 # --- Prevent WebView2 from spawning inside SearchHost (25H2) (Revision) ---
 Set-RegValue -Path "HKLM\SYSTEM\ControlSet001\Policies\Microsoft\FeatureManagement\Overrides" -Name "1694661260" -Value 0 -Type "DWord"
