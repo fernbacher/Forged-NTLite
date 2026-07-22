@@ -271,6 +271,7 @@ Get-Service -Name "WpnUserService*" | Restart-Service -Force -ErrorAction Silent
     # Disable GameDVR
     Set-RegValue -Path "HKCU\System\GameConfigStore" -Name "GameDVR_FSEBehaviorMode" -Value 0 -Type "DWord"
     Set-RegValue -Path "HKCU\System\GameConfigStore" -Name "GameDVR_Enabled" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -Value 0 -Type "DWord"
 
     # NVIDIA telemetry OFF (Revision)
     Set-RegValue -Path "HKCU\Software\NVIDIA Corporation\NVControlPanel2\Client" -Name "OptInOrOutPreference" -Value 0 -Type "DWord"
@@ -1236,6 +1237,8 @@ Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Mi
 
 # --- Block GamePresenceWriter activation (stops the "Get Xbox Game Bar" toast on first fullscreen launch) (ValleyOfDoom) ---
 Set-RegValue -Path "HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Windows.Gaming.GameBar.PresenceServer.Internal.PresenceWriter" -Name "ActivationType" -Value 0 -Type "DWord"
+Get-AppxPackage -AllUsers *XboxGamingOverlay* | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like "*XboxGamingOverlay*" | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
 
 # --- Prevent WebView2 from spawning inside SearchHost (25H2) (Revision) ---
 Set-RegValue -Path "HKLM\SYSTEM\ControlSet001\Policies\Microsoft\FeatureManagement\Overrides" -Name "1694661260" -Value 0 -Type "DWord"
