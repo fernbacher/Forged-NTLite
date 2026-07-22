@@ -76,7 +76,7 @@ Do this and you'll have a flawless experience on a Forged Windows install for yo
 
 ## Website
 
-Documentation, build guide, dual-boot instructions, and a live source code viewer at **[forged.sh](https://forged.sh)**.
+Documentation, build guide, dual-boot instructions, and a live source code viewer on the website **[forgedapp.surge.sh](https://forgedapp.surge.sh/)**.
 
 ---
 
