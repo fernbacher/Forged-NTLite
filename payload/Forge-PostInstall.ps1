@@ -272,6 +272,7 @@ Get-Service -Name "WpnUserService*" | Restart-Service -Force -ErrorAction Silent
     Set-RegValue -Path "HKCU\System\GameConfigStore" -Name "GameDVR_FSEBehaviorMode" -Value 0 -Type "DWord"
     Set-RegValue -Path "HKCU\System\GameConfigStore" -Name "GameDVR_Enabled" -Value 0 -Type "DWord"
     Set-RegValue -Path "HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -Value 0 -Type "DWord"
+    Set-RegValue -Path "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR" -Name "AppCaptureEnabled" -Value 0 -Type "DWord"
 
     # NVIDIA telemetry OFF (Revision)
     Set-RegValue -Path "HKCU\Software\NVIDIA Corporation\NVControlPanel2\Client" -Name "OptInOrOutPreference" -Value 0 -Type "DWord"
